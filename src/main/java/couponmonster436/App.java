@@ -20,12 +20,9 @@ public class App
     {
         coupons = new HashMap<>();
         producerThread = new Thread(new ProducerThread());
-        producerThread.start();
+        //producerThread.start();
         try {
-            serverSocket = new ServerSocket();
-            InetAddress inetAddress= InetAddress.getByName("0.0.0.0");
-            SocketAddress endPoint=new InetSocketAddress(inetAddress, App.SERVERPORT);
-            serverSocket.bind(endPoint);
+            serverSocket = new ServerSocket(App.SERVERPORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -64,7 +61,7 @@ class CommunicationThread implements Runnable {
                     String read = in.nextLine();
                     processMessages(read);
                 }
-                if(index+1 < App.coupons.size()){
+                if(index < App.coupons.size()){
                     Coupon toBeTransfered = App.coupons.get(index);
                     index++;
                     try {
@@ -76,11 +73,10 @@ class CommunicationThread implements Runnable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
             try {
                 clientSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ef) {
+                ef.printStackTrace();
             }
         }
     }
@@ -113,7 +109,9 @@ class ProducerThread implements Runnable{
         }
         int difficulty = ((int)(Math.random()*20+1));
         String problem = generateProblem(difficulty);
-        return new Coupon(buffer.toString(),new Date(),problem,difficulty*10 + "TL" + " discount for shoppings above " + difficulty*50 + " TL.",getResultOfProblem(problem),getTimeOfProblem((difficulty)));
+        int result = getResultOfProblem(problem);
+        if (result == Integer.MAX_VALUE) return new Coupon();
+        return new Coupon(buffer.toString(),new Date(),problem,difficulty*10 + "TL" + " discount for shoppings above " + difficulty*50 + " TL.",result,getTimeOfProblem((difficulty)));
     }
     public static String operator(){
         String opr="s";
@@ -166,24 +164,28 @@ class ProducerThread implements Runnable{
         ScriptEngineManager mgr = new ScriptEngineManager();
         ScriptEngine engine = mgr.getEngineByName("JavaScript");
         try {
-            return (int)engine.eval(problem);
+            return (int) engine.eval(problem);
         }catch (ScriptException e){
             e.printStackTrace();
-            return 0;
+            return Integer.MAX_VALUE;
         }
     }
     @Override
     public void run() {
         while(true){
             Coupon coupon = generate();
-            System.out.println(coupon);
-            try {
-                Thread.sleep((Math.round(Math.random()*30000))); // 0 to 30 seconds
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if(!coupon.getHash().equals("")){
+                System.out.println(coupon);
+                try {
+                    Thread.sleep((Math.round(Math.random()*30000))); // 0 to 30 seconds
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                App.coupons.put(counter,coupon);
+                counter++;
+            }else {
+                System.out.println("Coupon could not generated");
             }
-            App.coupons.put(counter,coupon);
-            counter++;
         }
     }
 }
