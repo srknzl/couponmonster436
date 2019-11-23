@@ -12,6 +12,7 @@ import javax.script.ScriptException;
 public class App
 {
     public static Map<String,Coupon> coupons;
+    public static LinkedList<String> broadCastMessages;
     private static Thread producerThread = null;
     public static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
@@ -19,6 +20,7 @@ public class App
     public static void main( String[] args )
     {
         coupons = new HashMap<>();
+        broadCastMessages = new LinkedList<>();
         producerThread = new Thread(new ProducerThread());
         producerThread.start();
         try {
@@ -47,6 +49,7 @@ class CommunicationThread implements Runnable {
     private Scanner in;
     private PrintWriter out;
     int index = App.coupons.size();
+    int broadcastIndex = App.broadCastMessages.size();
     public CommunicationThread(Socket clientSocket) {
         this.clientSocket = clientSocket;
     }
@@ -57,20 +60,42 @@ class CommunicationThread implements Runnable {
             this.in = new Scanner(this.clientSocket.getInputStream());
             this.out = new PrintWriter(this.clientSocket.getOutputStream(),true);
             while(true){
-                if(this.clientSocket.getInputStream().available() > 0 && in.hasNextLine()){
-                    String read = in.nextLine();
-                    processMessages(read);
+                System.out.println("Cycle");
+                if(Thread.interrupted()){
+                    return;
+                }
+                try{
+                    if(this.clientSocket.getInputStream().available() >0 && in.hasNextLine()){
+                        String read = in.nextLine();
+                        processMessages(read);
+                    }
+                }catch (NoSuchElementException e){
+                    try {
+                        clientSocket.close();
+                    } catch (IOException ef) {
+                        ef.printStackTrace();
+                    }
+                    return;
                 }
                 if(index < App.coupons.size()){
                     Coupon toBeTransfered = App.coupons.get(index);
                     index++;
-                    try {
-                        out.println("1" + toBeTransfered.giveMessageForm());
-                    }catch (Exception e){
-                        e.printStackTrace();
+                    if(toBeTransfered != null){
+                        try {
+                            out.println("1" + toBeTransfered.giveMessageForm());
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                     }
                 }
-                Thread.sleep(100);
+
+                while(broadcastIndex < App.broadCastMessages.size()){
+                    String message = App.broadCastMessages.get(broadcastIndex);
+                    System.out.println("Broadcasting "+ message);
+                    broadcastIndex++;
+                    out.println(message);
+                }
+                Thread.sleep(2000);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,10 +106,31 @@ class CommunicationThread implements Runnable {
             }
         }
     }
-
+    /*
+     0 Get: Hello  -> Send: Welcome + initial coupons
+     1 Send: New Coupon
+     2 Send: Clear coupon
+     3 Get: Answer -> Send: True/False
+     4 Get: Selection -> Send: True/False
+     5 Get: Dismiss
+    */
     public void processMessages(String message) {
         System.out.println("Incoming message: " + message);
-        if (message.charAt(0) == '3') {
+        if(message.charAt(0) == '0'){
+            StringBuilder coupons = new StringBuilder();
+            while(App.coupons.size()<20){
+                try{
+                    Thread.sleep(100);
+                }catch (InterruptedException e){
+                    Thread.currentThread().interrupt();
+                }
+            }
+            for (String s : App.coupons.keySet()) {
+                coupons.append(App.coupons.get(s).giveMessageForm()).append(";");
+            }
+            if(coupons.length()>0)coupons = new StringBuilder(coupons.substring(0, coupons.length() - 1));
+            out.println("0" + coupons);
+        }else if (message.charAt(0) == '3') {
             String[] tokens = message.substring(1).split("\\|");
             String hash = tokens[0];
             boolean correct;
@@ -95,18 +141,27 @@ class CommunicationThread implements Runnable {
                 correct = false;
             }
             if (correct){
-                out.println("3Success|"+hash);
+                out.println("3Yes|" + hash);
+                App.broadCastMessages.add("2" + hash);
+                System.out.println("Correct answer");
+            }else{
+                out.println("3No|" + hash);
+                System.out.println("Wrong answer");
             }
-
+            App.coupons.get(hash).lock.releaseLock();
         }else if(message.charAt(0) == '4') {
-
-        }else if(message.charAt(0) == '0'){
-            StringBuilder coupons = new StringBuilder();
-            for (String s : App.coupons.keySet()) {
-                coupons.append(App.coupons.get(s).giveMessageForm()).append(";");
+            String hash = message.substring(1);
+            if(App.coupons.get(hash).lock.getLock()){
+                out.println("4Yes|"+hash);
+                System.out.println("Outgoing yes");
+            }else{
+                out.println("4No|"+hash);
+                System.out.println("Outgoing no");
             }
-            if(coupons.length()>0)coupons = new StringBuilder(coupons.substring(0, coupons.length() - 1));
-            out.println("2" + coupons);
+        }else if(message.charAt(0) == '5'){
+            String[] tokens = message.substring(1).split("\\|");
+            String hash = tokens[0];
+            App.coupons.get(hash).lock.releaseLock();
         }
     }
 }
