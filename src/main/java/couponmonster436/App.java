@@ -11,7 +11,7 @@ import javax.script.ScriptException;
 
 public class App
 {
-    public static Map<Integer,Coupon> coupons;
+    public static Map<String,Coupon> coupons;
     private static Thread producerThread = null;
     public static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
@@ -20,7 +20,7 @@ public class App
     {
         coupons = new HashMap<>();
         producerThread = new Thread(new ProducerThread());
-        //producerThread.start();
+        producerThread.start();
         try {
             serverSocket = new ServerSocket(App.SERVERPORT);
         } catch (IOException e) {
@@ -46,7 +46,7 @@ class CommunicationThread implements Runnable {
     private Socket clientSocket;
     private Scanner in;
     private PrintWriter out;
-    int index = 0;
+    int index = App.coupons.size();
     public CommunicationThread(Socket clientSocket) {
         this.clientSocket = clientSocket;
     }
@@ -57,7 +57,7 @@ class CommunicationThread implements Runnable {
             this.in = new Scanner(this.clientSocket.getInputStream());
             this.out = new PrintWriter(this.clientSocket.getOutputStream(),true);
             while(true){
-                if(in.hasNextLine()){
+                if(this.clientSocket.getInputStream().available() > 0 && in.hasNextLine()){
                     String read = in.nextLine();
                     processMessages(read);
                 }
@@ -70,6 +70,7 @@ class CommunicationThread implements Runnable {
                         e.printStackTrace();
                     }
                 }
+                Thread.sleep(100);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,19 +84,33 @@ class CommunicationThread implements Runnable {
 
     public void processMessages(String message) {
         System.out.println("Incoming message: " + message);
-        if (message.equals("coupons")) {
-            out.println(App.coupons.toString());
-        } else if (message.equals("select coupon")) {
+        if (message.charAt(0) == '3') {
+            String[] tokens = message.substring(1).split("\\|");
+            String hash = tokens[0];
+            boolean correct;
+            try{
+                int answer = Integer.parseInt(tokens[1]);
+                correct = App.coupons.get(hash).checkAnswer(answer);
+            }catch (NumberFormatException e){
+                correct = false;
+            }
+            if (correct){
+                out.println("3Success|"+hash);
+            }
 
-        } else if (message.equals("answer coupon")) {
+        }else if(message.charAt(0) == '4') {
 
-        }else if(message.equals("Hello")){
-            out.println("Welcome");
+        }else if(message.charAt(0) == '0'){
+            StringBuilder coupons = new StringBuilder();
+            for (String s : App.coupons.keySet()) {
+                coupons.append(App.coupons.get(s).giveMessageForm()).append(";");
+            }
+            if(coupons.length()>0)coupons = new StringBuilder(coupons.substring(0, coupons.length() - 1));
+            out.println("2" + coupons);
         }
     }
 }
 class ProducerThread implements Runnable{
-    static int counter = 0;
     public Coupon generate() {
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
@@ -173,18 +188,18 @@ class ProducerThread implements Runnable{
     @Override
     public void run() {
         while(true){
-            Coupon coupon = generate();
-            if(!coupon.getHash().equals("")){
-                System.out.println(coupon);
-                try {
-                    Thread.sleep((Math.round(Math.random()*30000))); // 0 to 30 seconds
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            if(App.coupons.size()<20){
+                Coupon coupon = generate();
+                if(!coupon.getHash().equals("")){
+                    App.coupons.put(coupon.getHash(),coupon);
+                }else {
+                    System.out.println("Coupon could not generated");
                 }
-                App.coupons.put(counter,coupon);
-                counter++;
-            }else {
-                System.out.println("Coupon could not generated");
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
