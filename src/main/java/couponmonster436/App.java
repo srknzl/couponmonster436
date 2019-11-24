@@ -153,6 +153,7 @@ class CommunicationThread implements Runnable {
             }
             if(coupons.length()>0)coupons = new StringBuilder(coupons.substring(0, coupons.length() - 1));
             out.println("0" + coupons);
+            out.println("6"+this.name+"|"+this.username+"|"+this.score);
         }else if (message.charAt(0) == '3') {
             String[] tokens = message.substring(1).split("\\|");
             String hash = tokens[0];
