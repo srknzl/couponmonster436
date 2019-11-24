@@ -126,11 +126,11 @@ class CommunicationThread implements Runnable {
         }else if (message.charAt(0) == '3') {
             String[] tokens = message.substring(1).split("\\|");
             String hash = tokens[0];
-            boolean correct = false;
+            boolean correct;
             try{
                 int answer = Integer.parseInt(tokens[1]);
-                if(App.coupons.get(hash) != null )correct = App.coupons.get(hash).checkAnswer(answer);
-            }catch (NumberFormatException e){
+                correct = App.coupons.get(hash).checkAnswer(answer);
+            }catch (Exception e){
                 correct = false;
             }
             if (correct){
