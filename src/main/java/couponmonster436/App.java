@@ -187,6 +187,8 @@ class CommunicationThread implements Runnable {
         }else if(message.charAt(0) == '4') {
             String hash = message.substring(1);
             Coupon c = App.coupons.get(hash);
+            System.out.println("Trying get lock of: "+ hash);
+            System.out.println("Coupon: "+ c.toString());
             if(c.lock.getLock()){
                 selectedCoupon = c;
                 out.println("4Yes|"+hash);
@@ -199,7 +201,10 @@ class CommunicationThread implements Runnable {
             String[] tokens = message.substring(1).split("\\|");
             String hash = tokens[0];
             if(selectedCoupon != null && selectedCoupon.getHash().equals(hash))selectedCoupon = null;
-            if(App.coupons.get(hash) != null)App.coupons.get(hash).lock.releaseLock();
+            if(App.coupons.get(hash) != null){
+                System.out.println("Release lock of "+hash);
+                App.coupons.get(hash).lock.releaseLock();
+            }
         }else if(message.charAt(0) == '6'){
             out.println("6"+this.name+"|"+this.username+"|"+this.score);
         }else if(message.charAt(0) == '7'){
