@@ -229,7 +229,7 @@ class CommunicationThread implements Runnable {
                 toBeChanged.name = name;
                 this.name = name;
                 System.out.println("After change " + toBeChanged.toString());
-                out.println("8No");
+                out.println("8No" + "|" + this.name + "|" + this.username);
             }else{
                 System.out.println("Before change " + toBeChanged.toString());
                 toBeChanged.name = name;
@@ -241,7 +241,7 @@ class CommunicationThread implements Runnable {
                 toBeChanged.username = username;
                 this.username = username;
                 System.out.println("After change " + toBeChanged.toString());
-                out.println("8Yes");
+                out.println("8Yes" + "|" + this.name + "|" + this.username);
             }
         }
     }
