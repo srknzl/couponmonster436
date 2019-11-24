@@ -55,7 +55,7 @@ class CommunicationThread implements Runnable {
     }
 
     public void run() {
-        System.out.println("Conneted" + clientSocket);
+        System.out.println("Connected" + clientSocket);
         try {
             this.in = new Scanner(this.clientSocket.getInputStream());
             this.out = new PrintWriter(this.clientSocket.getOutputStream(),true);
@@ -245,8 +245,14 @@ class ProducerThread implements Runnable{
         while(true){
             if(App.coupons.size()<20){
                 Coupon coupon = generate();
+                try {
+                    Thread.sleep((int)Math.ceil(Math.random()*15000));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 if(!coupon.getHash().equals("")){
                     App.coupons.put(coupon.getHash(),coupon);
+                    System.out.println("Coupon added");
                 }else {
                     System.out.println("Coupon could not generated");
                 }
