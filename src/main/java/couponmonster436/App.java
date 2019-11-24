@@ -134,6 +134,7 @@ class CommunicationThread implements Runnable {
             if (correct){
                 out.println("3Yes|" + hash);
                 App.broadCastMessages.add("2" + hash);
+                App.coupons.remove(hash);
                 System.out.println("Correct answer");
             }else{
                 out.println("3No|" + hash);
