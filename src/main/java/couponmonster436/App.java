@@ -126,10 +126,10 @@ class CommunicationThread implements Runnable {
         }else if (message.charAt(0) == '3') {
             String[] tokens = message.substring(1).split("\\|");
             String hash = tokens[0];
-            boolean correct;
+            boolean correct = false;
             try{
                 int answer = Integer.parseInt(tokens[1]);
-                correct = App.coupons.get(hash).checkAnswer(answer);
+                if(App.coupons.get(hash) != null )correct = App.coupons.get(hash).checkAnswer(answer);
             }catch (NumberFormatException e){
                 correct = false;
             }
@@ -141,7 +141,7 @@ class CommunicationThread implements Runnable {
             }else{
                 out.println("3No|" + hash);
                 System.out.println("Wrong answer");
-                App.coupons.get(hash).lock.releaseLock();
+                if(App.coupons.get(hash) != null)App.coupons.get(hash).lock.releaseLock();
             }
         }else if(message.charAt(0) == '4') {
             String hash = message.substring(1);
@@ -158,7 +158,7 @@ class CommunicationThread implements Runnable {
             String[] tokens = message.substring(1).split("\\|");
             String hash = tokens[0];
             if(selectedCoupon != null && selectedCoupon.getHash().equals(hash))selectedCoupon = null;
-            App.coupons.get(hash).lock.releaseLock();
+            if(App.coupons.get(hash) != null)App.coupons.get(hash).lock.releaseLock();
         }
     }
 }
