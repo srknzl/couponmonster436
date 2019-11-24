@@ -55,7 +55,7 @@ class CommunicationThread implements Runnable {
     }
 
     public void run() {
-        System.out.println("Connected" + clientSocket);
+        System.out.println("Conneted" + clientSocket);
         try {
             this.in = new Scanner(this.clientSocket.getInputStream());
             this.out = new PrintWriter(this.clientSocket.getOutputStream(),true);
