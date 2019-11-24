@@ -187,8 +187,8 @@ class CommunicationThread implements Runnable {
         }else if(message.charAt(0) == '4') {
             String hash = message.substring(1);
             Coupon c = App.coupons.get(hash);
-            System.out.println("Trying get lock of: "+ hash);
-            System.out.println("Coupon: "+ c.toString());
+            //System.out.println("Trying get lock of: "+ hash);
+            //System.out.println("Coupon: "+ c.toString());
             if(c.lock.getLock()){
                 selectedCoupon = c;
                 out.println("4Yes|"+hash);
@@ -202,52 +202,52 @@ class CommunicationThread implements Runnable {
             String hash = tokens[0];
             if(selectedCoupon != null && selectedCoupon.getHash().equals(hash))selectedCoupon = null;
             if(App.coupons.get(hash) != null){
-                System.out.println("Release lock of "+hash);
+                //System.out.println("Release lock of "+hash);
                 App.coupons.get(hash).lock.releaseLock();
             }
         }else if(message.charAt(0) == '6'){
             out.println("6"+this.name+"|"+this.username+"|"+this.score);
         }else if(message.charAt(0) == '7'){
             StringBuilder users = new StringBuilder();
-            System.out.println(App.users.size());
+            //System.out.println(App.users.size());
             for (User s : App.users) {
                 users.append(s.name).append("|").append(s.username+"|").append(s.score).append(";");
             }
             if(users.length()>0)users = new StringBuilder(users.substring(0, users.length() - 1));
-            System.out.println("Users: " + users);
+            //System.out.println("Users: " + users);
             out.println("7" + users);
         }else if(message.charAt(0) == '8'){
             String[] tokens = message.substring(1).split("\\|");
             String name = tokens[0];
             String username = tokens[1];
-            System.out.println("name:" + name);
-            System.out.println("username:" + username);
+            //System.out.println("name:" + name);
+            //System.out.println("username:" + username);
             User toBeChanged = new User("","");
             for (User nextUser : App.users) {
                 if (nextUser.username.equals(this.username)) {
                     toBeChanged = nextUser;
-                    System.out.println("Found " + nextUser + " to be equal to this user.");
+                    //System.out.println("Found " + nextUser + " to be equal to this user.");
                     break;
                 }
             }
             if(App.users.contains(new User("", username))){
-                System.out.println("Before change " + toBeChanged.toString());
-                System.out.println("App.users.contains a user with username");
+                //System.out.println("Before change " + toBeChanged.toString());
+                //System.out.println("App.users.contains a user with username");
                 toBeChanged.name = name;
                 this.name = name;
-                System.out.println("After change " + toBeChanged.toString());
+                //System.out.println("After change " + toBeChanged.toString());
                 out.println("8No" + "|" + this.name + "|" + this.username);
             }else{
-                System.out.println("Before change " + toBeChanged.toString());
+                //System.out.println("Before change " + toBeChanged.toString());
                 toBeChanged.name = name;
                 this.name = name;
-                System.out.println("App.users does not contain a user with username");
-                for (User nextUser : App.users) {
+                //System.out.println("App.users does not contain a user with username");
+                /*for (User nextUser : App.users) {
                     System.out.println(nextUser.toString());
-                }
+                }*/
                 toBeChanged.username = username;
                 this.username = username;
-                System.out.println("After change " + toBeChanged.toString());
+                //System.out.println("After change " + toBeChanged.toString());
                 out.println("8Yes" + "|" + this.name + "|" + this.username);
             }
         }
