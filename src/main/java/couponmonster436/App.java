@@ -14,14 +14,14 @@ public class App
     public static Map<String,Coupon> coupons;
     public static LinkedList<String> broadCastMessages;
     public static Vector<String> producedCouponHashes;
-    public static HashSet<User> users;
+    public static Vector<User> users;
     private static Thread producerThread = null;
     public static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
 
     public static void main( String[] args )
     {
-        users = new HashSet<>();
+        users = new Vector<>();
         producedCouponHashes = new Vector<>();
         coupons = new HashMap<>();
         broadCastMessages = new LinkedList<>();
