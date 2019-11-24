@@ -213,7 +213,7 @@ class CommunicationThread implements Runnable {
             String[] tokens = message.substring(1).split("\\|");
             String name = tokens[0];
             String username = tokens[1];
-            if(App.users.contains(new User("", this.username))){
+            if(App.users.contains(new User(this.name, this.username))){
                 out.println("8No");
             }else{
                 for (User nextUser : App.users) {
