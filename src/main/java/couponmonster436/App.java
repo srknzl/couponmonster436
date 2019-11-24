@@ -87,7 +87,9 @@ class CommunicationThread implements Runnable {
                 }
 
                 while(broadcastIndex < App.broadCastMessages.size()){
+                    System.out.println("yy");
                     String message = App.broadCastMessages.get(broadcastIndex);
+                    System.out.println("zz");
                     System.out.println("Broadcasting "+ message);
                     broadcastIndex++;
                     out.println(message);
@@ -141,6 +143,7 @@ class CommunicationThread implements Runnable {
                 System.out.println("Wrong answer");
             }
             App.coupons.get(hash).lock.releaseLock();
+            System.out.println("xx");
         }else if(message.charAt(0) == '4') {
             String hash = message.substring(1);
             Coupon c = App.coupons.get(hash);
