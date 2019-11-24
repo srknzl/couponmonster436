@@ -1,17 +1,17 @@
 package couponmonster436;
 
-public class Lock {
-    static boolean available = true;
-    public Lock(){
+class Lock {
+    private boolean available = true;
+    Lock(){
     }
-    public boolean getLock(){
+    boolean getLock(){
         if (!available){
            return false;
         }
         available = false;
         return true;
     }
-    public void releaseLock(){
+    void releaseLock(){
         available = true;
     }
 }

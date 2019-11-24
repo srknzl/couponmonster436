@@ -11,12 +11,12 @@ import javax.script.ScriptException;
 
 public class App
 {
-    public static Map<String,Coupon> coupons;
-    public static LinkedList<String> broadCastMessages;
-    public static Vector<String> producedCouponHashes;
-    public static Vector<User> users;
+    static Map<String,Coupon> coupons;
+    static LinkedList<String> broadCastMessages;
+    static Vector<String> producedCouponHashes;
+    static Vector<User> users;
     private static Thread producerThread = null;
-    public static final int SERVERPORT = 6000;
+    private static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
 
     public static void main( String[] args )
@@ -57,9 +57,9 @@ class CommunicationThread implements Runnable {
     private String name;
     private int score;
 
-    int index = App.producedCouponHashes.size();
-    int broadcastIndex = App.broadCastMessages.size();
-    public CommunicationThread(Socket clientSocket) {
+    private int index = App.producedCouponHashes.size();
+    private int broadcastIndex = App.broadCastMessages.size();
+    CommunicationThread(Socket clientSocket) {
         this.clientSocket = clientSocket;
     }
 
@@ -127,7 +127,7 @@ class CommunicationThread implements Runnable {
      8 Get: New name and username Send: Yes/No
      9 Get: Pulse Send: Pulse
     */
-    public void processMessages(String message) {
+    private void processMessages(String message) {
         if(!message.equals("9"))System.out.println("Incoming message: " + message);
         if(message.charAt(0) == '0'){
             String[] tokens = message.substring(1).split("\\|",2);
@@ -252,7 +252,7 @@ class CommunicationThread implements Runnable {
     }
 }
 class ProducerThread implements Runnable{
-    public Coupon generate() {
+    private Coupon generate() {
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
         int targetStringLength = 30;
@@ -269,7 +269,7 @@ class ProducerThread implements Runnable{
         if (result == Integer.MAX_VALUE) return new Coupon();
         return new Coupon(buffer.toString(),new Date(),problem,difficulty*10 + "TL" + " discount for shoppings above " + difficulty*50 + " TL.",result,getTimeOfProblem((difficulty)));
     }
-    public static String operator(){
+    private static String operator(){
         String opr="s";
         int a=(int)(Math.random()*3+1);
         switch (a){
@@ -279,7 +279,7 @@ class ProducerThread implements Runnable{
         }
         return opr;
     }
-    public static String generateProblem(int difficulty){
+    private static String generateProblem(int difficulty){
         StringBuilder question = new StringBuilder();
         int a=(int)(Math.random()*difficulty+1);
         question.append(a);
@@ -313,10 +313,10 @@ class ProducerThread implements Runnable{
         }
         return question.toString();
     }
-    public static int getTimeOfProblem(int difficulty){
+    private static int getTimeOfProblem(int difficulty){
         return Math.max((int)Math.ceil(difficulty/1.4),3);
     }
-    public static int getResultOfProblem(String problem){
+    private static int getResultOfProblem(String problem){
         ScriptEngineManager mgr = new ScriptEngineManager();
         ScriptEngine engine = mgr.getEngineByName("JavaScript");
         try {
@@ -339,7 +339,6 @@ class ProducerThread implements Runnable{
                 if(!coupon.getHash().equals("")){
                     App.coupons.put(coupon.getHash(),coupon);
                     App.producedCouponHashes.add(coupon.getHash());
-                }else {
                 }
             }
             try {

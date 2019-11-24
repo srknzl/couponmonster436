@@ -7,13 +7,11 @@ public class Coupon {
     private String problem;
     private int answer;
     private String reward;
-    public Lock lock;
+    Lock lock;
 
-    public int getSolveTime() {
-        return solveTime;
-    }
+
     private int solveTime;
-    public Coupon(String hash, Date creationDate, String problem, String reward, int answer,int solveTime){
+    Coupon(String hash, Date creationDate, String problem, String reward, int answer, int solveTime){
         this.hash = hash;
         this.creationDate = creationDate;
         this.problem = problem;
@@ -22,7 +20,7 @@ public class Coupon {
         this.solveTime = solveTime;
         this.lock = new Lock();
     }
-    public Coupon(){
+    Coupon(){
         this.hash = "";
         this.creationDate = new Date();
         this.problem = "";
@@ -32,17 +30,14 @@ public class Coupon {
         this.lock = new Lock();
     }
 
-    public String getProblem(){
-        return this.problem;
-    }
-    public String getHash(){
+    String getHash(){
         return this.hash;
     }
 
-    public String getReward(){
+    String getReward(){
         return this.reward;
     }
-    public boolean checkAnswer(int answer){
+    boolean checkAnswer(int answer){
         return this.answer == answer;
     }
 
