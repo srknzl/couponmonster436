@@ -14,12 +14,14 @@ public class App
     public static Map<String,Coupon> coupons;
     public static LinkedList<String> broadCastMessages;
     public static Vector<String> producedCouponHashes;
+    public static Vector<User> users;
     private static Thread producerThread = null;
     public static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
 
     public static void main( String[] args )
     {
+        users = new Vector<>();
         producedCouponHashes = new Vector<>();
         coupons = new HashMap<>();
         broadCastMessages = new LinkedList<>();
@@ -51,6 +53,8 @@ class CommunicationThread implements Runnable {
     private Scanner in;
     private PrintWriter out;
     private Coupon selectedCoupon;
+    private String username;
+    private String name;
 
     int index = App.producedCouponHashes.size();
     int broadcastIndex = App.broadCastMessages.size();
@@ -87,9 +91,7 @@ class CommunicationThread implements Runnable {
                 }
 
                 while(broadcastIndex < App.broadCastMessages.size()){
-                    System.out.println("yy");
                     String message = App.broadCastMessages.get(broadcastIndex);
-                    System.out.println("zz");
                     System.out.println("Broadcasting "+ message);
                     broadcastIndex++;
                     out.println(message);
@@ -117,6 +119,12 @@ class CommunicationThread implements Runnable {
     public void processMessages(String message) {
         if(!message.equals("9"))System.out.println("Incoming message: " + message);
         if(message.charAt(0) == '0'){
+            String[] tokens = message.substring(1).split("\\|");
+            String name = tokens[0];
+            String username = tokens[1];
+            this.username = username;
+            this.name = name;
+            App.users.add(new User(name,username));
             StringBuilder coupons = new StringBuilder();
             for (String s : App.coupons.keySet()) {
                 coupons.append(App.coupons.get(s).giveMessageForm()).append(";");
@@ -135,7 +143,7 @@ class CommunicationThread implements Runnable {
             }
             if (correct){
                 out.println("3Yes|" + hash);
-                App.broadCastMessages.add("2" + hash);
+                App.broadCastMessages.add("2" + hash + "|" + this.name + "|" + this.username);
                 App.coupons.remove(hash);
                 System.out.println("Correct answer");
             }else{
