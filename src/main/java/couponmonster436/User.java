@@ -17,4 +17,8 @@ public class User {
         }
         return super.equals(obj);
     }
+    @Override
+    public String toString(){
+        return this.name+ this.username + this.score;
+    }
 }

@@ -235,7 +235,9 @@ class CommunicationThread implements Runnable {
                 toBeChanged.name = name;
                 this.name = name;
                 System.out.println("App.users does not contain a user with username");
-                System.out.println(App.users.toString());
+                for (User nextUser : App.users) {
+                    System.out.println(nextUser.toString());
+                }
                 toBeChanged.username = username;
                 this.username = username;
                 System.out.println("After change " + toBeChanged.toString());
