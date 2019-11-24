@@ -141,9 +141,8 @@ class CommunicationThread implements Runnable {
             }else{
                 out.println("3No|" + hash);
                 System.out.println("Wrong answer");
+                App.coupons.get(hash).lock.releaseLock();
             }
-            App.coupons.get(hash).lock.releaseLock();
-            System.out.println("xx");
         }else if(message.charAt(0) == '4') {
             String hash = message.substring(1);
             Coupon c = App.coupons.get(hash);
