@@ -216,16 +216,22 @@ class CommunicationThread implements Runnable {
             if(App.users.contains(new User(this.name, this.username))){
                 out.println("8No");
             }else{
+                boolean contains = false;
                 for (User nextUser : App.users) {
                     if (nextUser.username.equals(username)) {
                         nextUser.username = username;
                         nextUser.name = name;
                         this.username = username;
                         this.name = name;
+                        contains = true;
                         break;
                     }
                 }
-                out.println("8Yes");
+                if(contains){
+                    out.println("8Yes");
+                }else {
+                    out.println("8No");
+                }
             }
         }
     }
