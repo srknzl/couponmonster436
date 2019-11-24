@@ -48,6 +48,7 @@ class CommunicationThread implements Runnable {
     private Socket clientSocket;
     private Scanner in;
     private PrintWriter out;
+    private Coupon selectedCoupon;
     int index = App.coupons.size();
     int broadcastIndex = App.broadCastMessages.size();
     public CommunicationThread(Socket clientSocket) {
@@ -62,21 +63,14 @@ class CommunicationThread implements Runnable {
             while(true){
                 out.println("9");
                 if(out.checkError() || Thread.interrupted()){
+                    if(selectedCoupon!=null)selectedCoupon.lock.releaseLock();
                     return;
                 }
-                try{
-                    if(this.clientSocket.getInputStream().available() >0 && in.hasNextLine()){
-                        String read = in.nextLine();
-                        processMessages(read);
-                    }
-                }catch (NoSuchElementException e){
-                    try {
-                        clientSocket.close();
-                    } catch (IOException ef) {
-                        ef.printStackTrace();
-                    }
-                    return;
+                if(this.clientSocket.getInputStream().available() >0 && in.hasNextLine()){
+                    String read = in.nextLine();
+                    processMessages(read);
                 }
+
                 if(index < App.coupons.size()){
                     Coupon toBeTransfered = App.coupons.get(index);
                     index++;
@@ -106,6 +100,7 @@ class CommunicationThread implements Runnable {
             } catch (IOException ef) {
                 ef.printStackTrace();
             }
+            if(selectedCoupon != null)selectedCoupon.lock.releaseLock();
         }
     }
     /*
@@ -146,7 +141,9 @@ class CommunicationThread implements Runnable {
             App.coupons.get(hash).lock.releaseLock();
         }else if(message.charAt(0) == '4') {
             String hash = message.substring(1);
-            if(App.coupons.get(hash).lock.getLock()){
+            Coupon c = App.coupons.get(hash);
+            if(c.lock.getLock()){
+                selectedCoupon = c;
                 out.println("4Yes|"+hash);
                 System.out.println("Outgoing yes");
             }else{
@@ -156,6 +153,7 @@ class CommunicationThread implements Runnable {
         }else if(message.charAt(0) == '5'){
             String[] tokens = message.substring(1).split("\\|");
             String hash = tokens[0];
+            if(selectedCoupon != null && selectedCoupon.getHash().equals(hash))selectedCoupon = null;
             App.coupons.get(hash).lock.releaseLock();
         }
     }
