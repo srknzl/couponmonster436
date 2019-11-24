@@ -95,7 +95,7 @@ class CommunicationThread implements Runnable {
                     broadcastIndex++;
                     out.println(message);
                 }
-                Thread.sleep(2000);
+                Thread.sleep(100);
             }
         } catch (Exception e) {
             e.printStackTrace();
