@@ -60,7 +60,6 @@ class CommunicationThread implements Runnable {
             this.in = new Scanner(this.clientSocket.getInputStream());
             this.out = new PrintWriter(this.clientSocket.getOutputStream(),true);
             while(true){
-                System.out.println("Cycle");
                 if(Thread.interrupted()){
                     return;
                 }
