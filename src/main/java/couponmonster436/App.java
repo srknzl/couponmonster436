@@ -82,6 +82,7 @@ class CommunicationThread implements Runnable {
                     index++;
                     if(toBeTransfered != null){
                         try {
+                            System.out.println("Coupon is sending index is " + index);
                             out.println("1" + toBeTransfered.giveMessageForm());
                         }catch (Exception e){
                             e.printStackTrace();
@@ -115,7 +116,7 @@ class CommunicationThread implements Runnable {
      5 Get: Dismiss
     */
     public void processMessages(String message) {
-        System.out.println("Incoming message: " + message);
+        if(!message.equals("9"))System.out.println("Incoming message: " + message);
         if(message.charAt(0) == '0'){
             StringBuilder coupons = new StringBuilder();
             for (String s : App.coupons.keySet()) {
