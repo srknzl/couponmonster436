@@ -73,6 +73,7 @@ class CommunicationThread implements Runnable {
 
                 if(index < App.coupons.size()){
                     Coupon toBeTransfered = App.coupons.get(index);
+                    System.out.println(App.coupons);
                     index++;
                     System.out.println("Coupon is sending index is " + index);
                     if(toBeTransfered != null){
