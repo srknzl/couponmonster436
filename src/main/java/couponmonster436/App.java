@@ -13,12 +13,14 @@ public class App
 {
     public static Map<String,Coupon> coupons;
     public static LinkedList<String> broadCastMessages;
+    public static Vector<String> producedCouponHashes;
     private static Thread producerThread = null;
     public static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
 
     public static void main( String[] args )
     {
+        producedCouponHashes = new Vector<>();
         coupons = new HashMap<>();
         broadCastMessages = new LinkedList<>();
         producerThread = new Thread(new ProducerThread());
@@ -49,7 +51,8 @@ class CommunicationThread implements Runnable {
     private Scanner in;
     private PrintWriter out;
     private Coupon selectedCoupon;
-    int index = App.coupons.size();
+
+    int index = App.producedCouponHashes.size();
     int broadcastIndex = App.broadCastMessages.size();
     public CommunicationThread(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -71,15 +74,12 @@ class CommunicationThread implements Runnable {
                     processMessages(read);
                 }
 
-                if(index < App.coupons.size()){
-                    Coupon toBeTransfered = App.coupons.get(index);
-                    System.out.println(App.coupons);
+                if(index < App.producedCouponHashes.size()){
+                    String hash = App.producedCouponHashes.get(index);
                     index++;
-                    System.out.println("Coupon is sending index is " + index);
-                    if(toBeTransfered != null){
-                        System.out.println("Not null");
+                    if(App.coupons.get(hash) != null){
                         try {
-                            out.println("1" + toBeTransfered.giveMessageForm());
+                            out.println("1" + App.coupons.get(hash).giveMessageForm());
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -246,9 +246,8 @@ class ProducerThread implements Runnable{
                 }
                 if(!coupon.getHash().equals("")){
                     App.coupons.put(coupon.getHash(),coupon);
-                    System.out.println("Coupon added");
+                    App.producedCouponHashes.add(coupon.getHash());
                 }else {
-                    System.out.println("Coupon could not generated");
                 }
             }
             try {
