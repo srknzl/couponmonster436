@@ -222,10 +222,13 @@ class CommunicationThread implements Runnable {
             }
             if(App.users.contains(new User("", username))){
                 toBeChanged.name = name;
+                this.name = name;
                 out.println("8No");
             }else{
                 toBeChanged.name = name;
+                this.name = name;
                 toBeChanged.username = username;
+                this.username = username;
                 out.println("8Yes");
             }
         }
