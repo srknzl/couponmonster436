@@ -14,14 +14,14 @@ public class App
     public static Map<String,Coupon> coupons;
     public static LinkedList<String> broadCastMessages;
     public static Vector<String> producedCouponHashes;
-    public static Vector<User> users;
+    public static HashSet<User> users;
     private static Thread producerThread = null;
     public static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
 
     public static void main( String[] args )
     {
-        users = new Vector<>();
+        users = new HashSet<>();
         producedCouponHashes = new Vector<>();
         coupons = new HashMap<>();
         broadCastMessages = new LinkedList<>();
@@ -55,6 +55,7 @@ class CommunicationThread implements Runnable {
     private Coupon selectedCoupon;
     private String username;
     private String name;
+    private int score;
 
     int index = App.producedCouponHashes.size();
     int broadcastIndex = App.broadCastMessages.size();
@@ -71,6 +72,12 @@ class CommunicationThread implements Runnable {
                 out.println("9");
                 if(out.checkError() || Thread.interrupted()){
                     if(selectedCoupon!=null)selectedCoupon.lock.releaseLock();
+                    for (User nextUser : App.users) {
+                        if (nextUser.username.equals(this.username)) {
+                            App.users.remove(nextUser);
+                            break;
+                        }
+                    }
                     return;
                 }
                 if(this.clientSocket.getInputStream().available() >0 && in.hasNextLine()){
@@ -115,6 +122,10 @@ class CommunicationThread implements Runnable {
      3 Get: Answer -> Send: True/False
      4 Get: Selection -> Send: True/False
      5 Get: Dismiss
+     6 Send: User data
+     7 Send: All users
+     8 Get: New name and username Send: Yes/No
+     9 Get: Pulse Send: Pulse
     */
     public void processMessages(String message) {
         if(!message.equals("9"))System.out.println("Incoming message: " + message);
@@ -122,8 +133,19 @@ class CommunicationThread implements Runnable {
             String[] tokens = message.substring(1).split("\\|");
             String name = tokens[0];
             String username = tokens[1];
+            if(name.equals("")){
+               name = "Coupon Monster";
+            }
+            if(username.equals("")){
+                int random=0;
+                while (App.users.contains(new User("","couponmonster"+random))){
+                    random = ((int)Math.floor(Math.random()*10000));
+                }
+                username = "couponmonster"+random;
+            }
             this.username = username;
             this.name = name;
+            this.score = 0;
             App.users.add(new User(name,username));
             StringBuilder coupons = new StringBuilder();
             for (String s : App.coupons.keySet()) {
@@ -143,7 +165,17 @@ class CommunicationThread implements Runnable {
             }
             if (correct){
                 out.println("3Yes|" + hash);
-                App.broadCastMessages.add("2" + hash + "|" + this.name + "|" + this.username);
+                String reward = App.coupons.get(hash).getReward();
+                int indexOfFirstTL = reward.indexOf("TL");
+                int difficulty = Integer.parseInt(reward.substring(0,indexOfFirstTL))/10;
+                for (User nextUser : App.users) {
+                    if (nextUser.username.equals(this.username)) {
+                        nextUser.score += difficulty;
+                        this.score = nextUser.score;
+                        break;
+                    }
+                }
+                App.broadCastMessages.add("2" + hash + "|" + this.name + "|" + this.username + "|" + difficulty);
                 App.coupons.remove(hash);
                 System.out.println("Correct answer");
             }else{
@@ -167,6 +199,33 @@ class CommunicationThread implements Runnable {
             String hash = tokens[0];
             if(selectedCoupon != null && selectedCoupon.getHash().equals(hash))selectedCoupon = null;
             if(App.coupons.get(hash) != null)App.coupons.get(hash).lock.releaseLock();
+        }else if(message.charAt(0) == '6'){
+            out.println("6"+this.name+"|"+this.username+"|"+this.score);
+        }else if(message.charAt(0) == '7'){
+            StringBuilder users = new StringBuilder();
+            for (User s : App.users) {
+                users.append(s.name+"|").append(s.username+"|").append(s.score).append(";");
+            }
+            if(users.length()>0)users = new StringBuilder(users.substring(0, users.length() - 1));
+            out.println("7" + users);
+        }else if(message.charAt(0) == '8'){
+            String[] tokens = message.substring(1).split("\\|");
+            String name = tokens[0];
+            String username = tokens[1];
+            if(App.users.contains(new User("", this.username))){
+                out.println("8No");
+            }else{
+                for (User nextUser : App.users) {
+                    if (nextUser.username.equals(username)) {
+                        nextUser.username = username;
+                        nextUser.name = name;
+                        this.username = username;
+                        this.name = name;
+                        break;
+                    }
+                }
+                out.println("8Yes");
+            }
         }
     }
 }
