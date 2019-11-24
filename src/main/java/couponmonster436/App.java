@@ -130,7 +130,7 @@ class CommunicationThread implements Runnable {
     public void processMessages(String message) {
         if(!message.equals("9"))System.out.println("Incoming message: " + message);
         if(message.charAt(0) == '0'){
-            String[] tokens = message.substring(1).split("\\|");
+            String[] tokens = message.substring(1).split("\\|",2);
             String name = tokens[0];
             String username = tokens[1];
             if(name.equals("")){
