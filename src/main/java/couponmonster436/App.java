@@ -118,13 +118,6 @@ class CommunicationThread implements Runnable {
         System.out.println("Incoming message: " + message);
         if(message.charAt(0) == '0'){
             StringBuilder coupons = new StringBuilder();
-            while(App.coupons.size()<20){
-                try{
-                    Thread.sleep(100);
-                }catch (InterruptedException e){
-                    Thread.currentThread().interrupt();
-                }
-            }
             for (String s : App.coupons.keySet()) {
                 coupons.append(App.coupons.get(s).giveMessageForm()).append(";");
             }
