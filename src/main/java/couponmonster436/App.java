@@ -213,22 +213,20 @@ class CommunicationThread implements Runnable {
             String[] tokens = message.substring(1).split("\\|");
             String name = tokens[0];
             String username = tokens[1];
-            User toBeChanged = null;
+            User toBeChanged = new User("","");
             for (User nextUser : App.users) {
-                if (nextUser.username.equals(username)) {
+                if (nextUser.username.equals(this.username)) {
                     toBeChanged = nextUser;
                     break;
                 }
             }
             if(App.users.contains(new User("", username))){
-                if(toBeChanged != null)toBeChanged.name = name;
+                toBeChanged.name = name;
                 out.println("8No");
             }else{
-                if(toBeChanged != null){
-                    toBeChanged.name = name;
-                    toBeChanged.username = username;
-                    out.println("8Yes");
-                }
+                toBeChanged.name = name;
+                toBeChanged.username = username;
+                out.println("8Yes");
             }
         }
     }
