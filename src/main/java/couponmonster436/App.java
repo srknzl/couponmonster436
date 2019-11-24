@@ -224,20 +224,21 @@ class CommunicationThread implements Runnable {
                 }
             }
             if(App.users.contains(new User("", username))){
-                System.out.println("Before change " + toBeChanged);
+                System.out.println("Before change " + toBeChanged.toString());
                 System.out.println("App.users.contains a user with username");
                 toBeChanged.name = name;
                 this.name = name;
-                System.out.println("After change " + toBeChanged);
+                System.out.println("After change " + toBeChanged.toString());
                 out.println("8No");
             }else{
-                System.out.println("Before change " + toBeChanged);
+                System.out.println("Before change " + toBeChanged.toString());
                 toBeChanged.name = name;
                 this.name = name;
                 System.out.println("App.users does not contain a user with username");
+                System.out.println(App.users.toString());
                 toBeChanged.username = username;
                 this.username = username;
-                System.out.println("After change " + toBeChanged);
+                System.out.println("After change " + toBeChanged.toString());
                 out.println("8Yes");
             }
         }
