@@ -215,12 +215,10 @@ class CommunicationThread implements Runnable {
             out.println("6"+this.name+"|"+this.username+"|"+this.score);
         }else if(message.charAt(0) == '7'){
             StringBuilder users = new StringBuilder();
-            //System.out.println(App.users.size());
             for (User s : App.users) {
                 users.append(s.name).append("|").append(s.username).append("|").append(s.score).append(";");
             }
             if(users.length()>0)users = new StringBuilder(users.substring(0, users.length() - 1));
-            //System.out.println("Users: " + users);
             out.println("7" + users);
         }else if(message.charAt(0) == '8'){
             String[] tokens = message.substring(1).split("\\|",3);
