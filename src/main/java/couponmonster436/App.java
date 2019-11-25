@@ -4,6 +4,7 @@ package couponmonster436;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptEngine;
@@ -70,7 +71,7 @@ class CommunicationThread implements Runnable {
         System.out.println("Connected" + clientSocket);
         try {
             Scanner in = new Scanner(this.clientSocket.getInputStream());
-            this.out = new PrintWriter(this.clientSocket.getOutputStream(),true);
+            out = new PrintWriter(new BufferedWriter( new OutputStreamWriter(this.clientSocket.getOutputStream(), StandardCharsets.UTF_8)),true);
             while(true){
                 pulseCounter = (pulseCounter+1)%10;
                 if(pulseCounter == 0)out.println("9");
