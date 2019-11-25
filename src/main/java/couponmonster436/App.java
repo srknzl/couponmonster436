@@ -15,7 +15,6 @@ public class App
     static LinkedList<String> broadCastMessages;
     static Vector<String> producedCouponHashes;
     static Vector<User> users;
-    private static Thread producerThread = null;
     private static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
 
@@ -25,7 +24,7 @@ public class App
         producedCouponHashes = new Vector<>();
         coupons = new HashMap<>();
         broadCastMessages = new LinkedList<>();
-        producerThread = new Thread(new ProducerThread());
+        Thread producerThread = new Thread(new ProducerThread());
         producerThread.start();
         try {
             serverSocket = new ServerSocket(App.SERVERPORT);
@@ -50,7 +49,6 @@ public class App
 }
 class CommunicationThread implements Runnable {
     private Socket clientSocket;
-    private Scanner in;
     private PrintWriter out;
     private Coupon selectedCoupon;
     private String username;
@@ -67,7 +65,7 @@ class CommunicationThread implements Runnable {
     public void run() {
         System.out.println("Connected" + clientSocket);
         try {
-            this.in = new Scanner(this.clientSocket.getInputStream());
+            Scanner in = new Scanner(this.clientSocket.getInputStream());
             this.out = new PrintWriter(this.clientSocket.getOutputStream(),true);
             while(true){
                 pulseCounter = (pulseCounter+1)%10;
@@ -213,7 +211,7 @@ class CommunicationThread implements Runnable {
             StringBuilder users = new StringBuilder();
             //System.out.println(App.users.size());
             for (User s : App.users) {
-                users.append(s.name).append("|").append(s.username+"|").append(s.score).append(";");
+                users.append(s.name).append("|").append(s.username).append("|").append(s.score).append(";");
             }
             if(users.length()>0)users = new StringBuilder(users.substring(0, users.length() - 1));
             //System.out.println("Users: " + users);

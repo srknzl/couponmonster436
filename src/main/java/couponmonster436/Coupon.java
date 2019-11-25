@@ -52,7 +52,7 @@ public class Coupon {
                 ", solveTime=" + solveTime + "\n" +
                 '}';
     }
-    public String giveMessageForm(){
+    String giveMessageForm(){
         return hash + "|" + problem + "|" + answer + "|" + reward + "|" + solveTime;
     }
 }
