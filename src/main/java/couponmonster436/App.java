@@ -56,6 +56,7 @@ class CommunicationThread implements Runnable {
     private String username;
     private String name;
     private int score;
+    private int pulseCounter = 0;
 
     private int index = App.producedCouponHashes.size();
     private int broadcastIndex = App.broadCastMessages.size();
@@ -69,7 +70,8 @@ class CommunicationThread implements Runnable {
             this.in = new Scanner(this.clientSocket.getInputStream());
             this.out = new PrintWriter(this.clientSocket.getOutputStream(),true);
             while(true){
-                out.println("9");
+                pulseCounter = (pulseCounter+1)%10;
+                if(pulseCounter == 0)out.println("9");
                 if(out.checkError() || Thread.interrupted()){
                     if(selectedCoupon!=null)selectedCoupon.lock.releaseLock();
                     for (User nextUser : App.users) {
