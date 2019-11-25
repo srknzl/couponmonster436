@@ -53,6 +53,6 @@ public class Coupon {
                 '}';
     }
     String giveMessageForm(){
-        return hash + "|" + problem + "|" + answer + "|" + reward + "|" + solveTime;
+        return hash + "|" + problem  + "|" + reward + "|" + solveTime;
     }
 }

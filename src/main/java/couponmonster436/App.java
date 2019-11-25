@@ -31,8 +31,9 @@ public class App
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Socket socket = null;
+        Socket socket;
         System.out.println("Listening incoming connections on external ip of this device, port 6000...");
+        //noinspection InfiniteLoopStatement
         while (true) {
             try {
                 socket = serverSocket.accept();
@@ -330,6 +331,7 @@ class ProducerThread implements Runnable{
     }
     @Override
     public void run() {
+        //noinspection InfiniteLoopStatement
         while(true){
             if(App.coupons.size()<20){
                 Coupon coupon = generate();
