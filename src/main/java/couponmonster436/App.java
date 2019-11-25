@@ -15,6 +15,7 @@ public class App
     static LinkedList<String> broadCastMessages;
     static Vector<String> producedCouponHashes;
     static Vector<User> users;
+    static Vector<CommunicationThread> Communications;
     private static final int SERVERPORT = 6000;
     private static ServerSocket serverSocket;
 
@@ -22,6 +23,7 @@ public class App
     {
         users = new Vector<>();
         producedCouponHashes = new Vector<>();
+        Communications = new Vector<>();
         coupons = new HashMap<>();
         broadCastMessages = new LinkedList<>();
         Thread producerThread = new Thread(new ProducerThread());
@@ -39,6 +41,7 @@ public class App
                 socket = serverSocket.accept();
                 System.out.println("Connected");
                 CommunicationThread communicationThread = new CommunicationThread(socket);
+                Communications.add(communicationThread);
                 new Thread(communicationThread).start();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -52,9 +55,9 @@ class CommunicationThread implements Runnable {
     private Socket clientSocket;
     private PrintWriter out;
     private Coupon selectedCoupon;
-    private String username;
-    private String name;
-    private int score;
+    private String username = "";
+    private String name = "";
+    private int score = 0;
     private int pulseCounter = 0;
 
     private int index = App.producedCouponHashes.size();
@@ -79,6 +82,7 @@ class CommunicationThread implements Runnable {
                             break;
                         }
                     }
+                    App.Communications.removeElementAt(App.Communications.indexOf(this));
                     return;
                 }
                 if(this.clientSocket.getInputStream().available() >0 && in.hasNextLine()){
@@ -114,6 +118,7 @@ class CommunicationThread implements Runnable {
                 ef.printStackTrace();
             }
             if(selectedCoupon != null)selectedCoupon.lock.releaseLock();
+            App.Communications.removeElementAt(App.Communications.indexOf(this));
         }
     }
     /*
@@ -218,38 +223,42 @@ class CommunicationThread implements Runnable {
             //System.out.println("Users: " + users);
             out.println("7" + users);
         }else if(message.charAt(0) == '8'){
-            String[] tokens = message.substring(1).split("\\|");
+            String[] tokens = message.substring(1).split("\\|",3);
             String name = tokens[0];
             String username = tokens[1];
-            //System.out.println("name:" + name);
-            //System.out.println("username:" + username);
+            String currentUsername = tokens[2];
             User toBeChanged = new User("","");
+            CommunicationThread threadToBeUpdated = null;
+            for (CommunicationThread c : App.Communications){
+                if(c.username.equals(currentUsername)){
+                    threadToBeUpdated = c;
+                }
+            }
             for (User nextUser : App.users) {
-                if (nextUser.username.equals(this.username)) {
+                if (nextUser.username.equals(currentUsername)) {
                     toBeChanged = nextUser;
-                    //System.out.println("Found " + nextUser + " to be equal to this user.");
                     break;
                 }
             }
             if(App.users.contains(new User("", username))){
-                //System.out.println("Before change " + toBeChanged.toString());
-                //System.out.println("App.users.contains a user with username");
-                toBeChanged.name = name;
-                this.name = name;
-                //System.out.println("After change " + toBeChanged.toString());
-                out.println("8No" + "|" + this.name + "|" + this.username);
+                if(threadToBeUpdated != null){
+                    toBeChanged.name = name;
+                    threadToBeUpdated.name = name;
+                    out.println("8No" + "|" + threadToBeUpdated.name  + "|" + threadToBeUpdated.username);
+                }else{
+                    out.println("8No"+ "|" + name + "|" + username);
+                }
             }else{
-                //System.out.println("Before change " + toBeChanged.toString());
-                toBeChanged.name = name;
-                this.name = name;
-                //System.out.println("App.users does not contain a user with username");
-                /*for (User nextUser : App.users) {
-                    System.out.println(nextUser.toString());
-                }*/
-                toBeChanged.username = username;
-                this.username = username;
-                //System.out.println("After change " + toBeChanged.toString());
-                out.println("8Yes" + "|" + this.name + "|" + this.username);
+                if(threadToBeUpdated != null){
+                    toBeChanged.name = name;
+                    threadToBeUpdated.name = name;
+                    toBeChanged.username = username;
+                    threadToBeUpdated.username = username;
+                    out.println("8Yes" + "|" + threadToBeUpdated.name + "|" + threadToBeUpdated.username);
+                }else {
+                    out.println("8No" + "|" + name + "|" + username);
+                }
+
             }
         }
     }
