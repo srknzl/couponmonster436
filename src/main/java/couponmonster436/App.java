@@ -70,7 +70,7 @@ class CommunicationThread implements Runnable {
     public void run() {
         System.out.println("Connected" + clientSocket);
         try {
-            Scanner in = new Scanner(this.clientSocket.getInputStream());
+            Scanner in = new Scanner(this.clientSocket.getInputStream(), StandardCharsets.UTF_8);
             out = new PrintWriter(new BufferedWriter( new OutputStreamWriter(this.clientSocket.getOutputStream(), StandardCharsets.UTF_8)),true);
             while(true){
                 pulseCounter = (pulseCounter+1)%10;
@@ -136,130 +136,141 @@ class CommunicationThread implements Runnable {
     */
     private void processMessages(String message) {
         if(!message.equals("9"))System.out.println("Incoming message: " + message);
-        if(message.charAt(0) == '0'){
-            String[] tokens = message.substring(1).split("\\|",2);
-            String name = tokens[0];
-            String username = tokens[1];
-            if(name.equals("")){
-               name = "Coupon Monster";
-            }
-            if(username.equals("")){
-                int random=0;
-                while (App.users.contains(new User("","couponmonster"+random))){
-                    random = ((int)Math.floor(Math.random()*10000));
+        if(message.length() > 0) {
+            if (message.charAt(0) == '0') {
+                if(message.length() == 1) return;
+                String[] tokens = message.substring(1).split("\\|", 2);
+                if(tokens.length != 2) return;
+                String name = tokens[0];
+                String username = tokens[1];
+                if (name.equals("")) {
+                    name = "Coupon Monster";
                 }
-                username = "couponmonster"+random;
-            }
-            this.username = username;
-            this.name = name;
-            this.score = 0;
-            App.users.add(new User(name,username));
-            StringBuilder coupons = new StringBuilder();
-            for (String s : App.coupons.keySet()) {
-                coupons.append(App.coupons.get(s).giveMessageForm()).append(";");
-            }
-            if(coupons.length()>0)coupons = new StringBuilder(coupons.substring(0, coupons.length() - 1));
-            out.println("0" + coupons);
-            out.println("6"+this.name+"|"+this.username+"|"+this.score);
-        }else if (message.charAt(0) == '3') {
-            String[] tokens = message.substring(1).split("\\|");
-            String hash = tokens[0];
-            boolean correct;
-            try{
-                int answer = Integer.parseInt(tokens[1]);
-                correct = App.coupons.get(hash).checkAnswer(answer);
-            }catch (Exception e){
-                correct = false;
-            }
-            if (correct){
-                out.println("3Yes|" + hash);
-                String reward = App.coupons.get(hash).getReward();
-                int indexOfFirstTL = reward.indexOf("TL");
-                int difficulty = Integer.parseInt(reward.substring(0,indexOfFirstTL))/10;
+                if (username.equals("")) {
+                    int random = 0;
+                    while (App.users.contains(new User("", "couponmonster" + random))) {
+                        random = ((int) Math.floor(Math.random() * 10000));
+                    }
+                    username = "couponmonster" + random;
+                }
+                this.username = username;
+                this.name = name;
+                this.score = 0;
+                App.users.add(new User(name, username));
+                StringBuilder coupons = new StringBuilder();
+                for (String s : App.coupons.keySet()) {
+                    coupons.append(App.coupons.get(s).giveMessageForm()).append(";");
+                }
+                if (coupons.length() > 0) coupons = new StringBuilder(coupons.substring(0, coupons.length() - 1));
+                out.println("0" + coupons);
+                out.println("6" + this.name + "|" + this.username + "|" + this.score);
+            } else if (message.charAt(0) == '3') {
+                if(message.length() == 1) return;
+                String[] tokens = message.substring(1).split("\\|");
+                if(tokens.length != 2) return;
+                String hash = tokens[0];
+                boolean correct;
+                try {
+                    int answer = Integer.parseInt(tokens[1]);
+                    correct = App.coupons.get(hash).checkAnswer(answer);
+                } catch (Exception e) {
+                    correct = false;
+                }
+                if (correct) {
+                    out.println("3Yes|" + hash);
+                    String reward = App.coupons.get(hash).getReward();
+                    int indexOfFirstTL = reward.indexOf("TL");
+                    int difficulty = Integer.parseInt(reward.substring(0, indexOfFirstTL)) / 10;
+                    for (User nextUser : App.users) {
+                        if (nextUser.username.equals(this.username)) {
+                            nextUser.score += difficulty;
+                            this.score = nextUser.score;
+                            break;
+                        }
+                    }
+                    App.broadCastMessages.add("2" + hash + "|" + this.name + "|" + this.username + "|" + difficulty);
+                    App.coupons.remove(hash);
+                    System.out.println("Correct answer");
+                } else {
+                    Coupon c = App.coupons.get(hash);
+                    out.println("3No|" + hash);
+                    System.out.println("Wrong answer");
+                    if (c != null && c.lock != null) c.lock.releaseLock();
+                }
+            } else if (message.charAt(0) == '4') {
+                if(message.length() == 1) return;
+                String hash = message.substring(1);
+                Coupon c = App.coupons.get(hash);
+                //System.out.println("Trying get lock of: "+ hash);
+                //System.out.println("Coupon: "+ c.toString());
+
+                if (c != null && c.lock != null && c.lock.getLock()) {
+                    selectedCoupon = c;
+                    out.println("4Yes|" + hash);
+                    System.out.println("Outgoing yes");
+                } else {
+                    out.println("4No|" + hash);
+                    System.out.println("Outgoing no");
+                }
+            } else if (message.charAt(0) == '5') {
+                if(message.length() == 1) return;
+                String[] tokens = message.substring(1).split("\\|");
+                if(tokens.length != 1) return;
+                String hash = tokens[0];
+                if (selectedCoupon != null && selectedCoupon.getHash().equals(hash)) selectedCoupon = null;
+                Coupon c = App.coupons.get(hash);
+                if (c != null && c.lock != null) {
+                    c.lock.releaseLock();
+                }
+            } else if (message.charAt(0) == '6') {
+                out.println("6" + this.name + "|" + this.username + "|" + this.score);
+            } else if (message.charAt(0) == '7') {
+                StringBuilder users = new StringBuilder();
+                for (User s : App.users) {
+                    users.append(s.name).append("|").append(s.username).append("|").append(s.score).append(";");
+                }
+                if (users.length() > 0) users = new StringBuilder(users.substring(0, users.length() - 1));
+                out.println("7" + users);
+            } else if (message.charAt(0) == '8') {
+                if(message.length() == 1) return;
+                String[] tokens = message.substring(1).split("\\|", 3);
+                if(tokens.length != 3) return;
+                String name = tokens[0];
+                String username = tokens[1];
+                String currentUsername = tokens[2];
+                User toBeChanged = new User("", "");
+                CommunicationThread threadToBeUpdated = null;
+                for (CommunicationThread c : App.Communications) {
+                    if (c.username.equals(currentUsername)) {
+                        threadToBeUpdated = c;
+                    }
+                }
                 for (User nextUser : App.users) {
-                    if (nextUser.username.equals(this.username)) {
-                        nextUser.score += difficulty;
-                        this.score = nextUser.score;
+                    if (nextUser.username.equals(currentUsername)) {
+                        toBeChanged = nextUser;
                         break;
                     }
                 }
-                App.broadCastMessages.add("2" + hash + "|" + this.name + "|" + this.username + "|" + difficulty);
-                App.coupons.remove(hash);
-                System.out.println("Correct answer");
-            }else{
-                Coupon c = App.coupons.get(hash);
-                out.println("3No|" + hash);
-                System.out.println("Wrong answer");
-                if(c != null && c.lock != null)c.lock.releaseLock();
-            }
-        }else if(message.charAt(0) == '4') {
-            String hash = message.substring(1);
-            Coupon c = App.coupons.get(hash);
-            //System.out.println("Trying get lock of: "+ hash);
-            //System.out.println("Coupon: "+ c.toString());
+                if (App.users.contains(new User("", username))) {
+                    if (threadToBeUpdated != null) {
+                        toBeChanged.name = name;
+                        threadToBeUpdated.name = name;
+                        out.println("8No" + "|" + threadToBeUpdated.name + "|" + threadToBeUpdated.username);
+                    } else {
+                        out.println("8No" + "|" + name + "|" + username);
+                    }
+                } else {
+                    if (threadToBeUpdated != null) {
+                        toBeChanged.name = name;
+                        threadToBeUpdated.name = name;
+                        toBeChanged.username = username;
+                        threadToBeUpdated.username = username;
+                        out.println("8Yes" + "|" + threadToBeUpdated.name + "|" + threadToBeUpdated.username);
+                    } else {
+                        out.println("8No" + "|" + name + "|" + username);
+                    }
 
-            if(c!=null && c.lock != null && c.lock.getLock()){
-                selectedCoupon = c;
-                out.println("4Yes|"+hash);
-                System.out.println("Outgoing yes");
-            }else{
-                out.println("4No|"+hash);
-                System.out.println("Outgoing no");
-            }
-        }else if(message.charAt(0) == '5'){
-            String[] tokens = message.substring(1).split("\\|");
-            String hash = tokens[0];
-            if(selectedCoupon != null && selectedCoupon.getHash().equals(hash))selectedCoupon = null;
-            Coupon c = App.coupons.get(hash);
-            if(c != null && c.lock != null){
-                c.lock.releaseLock();
-            }
-        }else if(message.charAt(0) == '6'){
-            out.println("6"+this.name+"|"+this.username+"|"+this.score);
-        }else if(message.charAt(0) == '7'){
-            StringBuilder users = new StringBuilder();
-            for (User s : App.users) {
-                users.append(s.name).append("|").append(s.username).append("|").append(s.score).append(";");
-            }
-            if(users.length()>0)users = new StringBuilder(users.substring(0, users.length() - 1));
-            out.println("7" + users);
-        }else if(message.charAt(0) == '8'){
-            String[] tokens = message.substring(1).split("\\|",3);
-            String name = tokens[0];
-            String username = tokens[1];
-            String currentUsername = tokens[2];
-            User toBeChanged = new User("","");
-            CommunicationThread threadToBeUpdated = null;
-            for (CommunicationThread c : App.Communications){
-                if(c.username.equals(currentUsername)){
-                    threadToBeUpdated = c;
                 }
-            }
-            for (User nextUser : App.users) {
-                if (nextUser.username.equals(currentUsername)) {
-                    toBeChanged = nextUser;
-                    break;
-                }
-            }
-            if(App.users.contains(new User("", username))){
-                if(threadToBeUpdated != null){
-                    toBeChanged.name = name;
-                    threadToBeUpdated.name = name;
-                    out.println("8No" + "|" + threadToBeUpdated.name  + "|" + threadToBeUpdated.username);
-                }else{
-                    out.println("8No"+ "|" + name + "|" + username);
-                }
-            }else{
-                if(threadToBeUpdated != null){
-                    toBeChanged.name = name;
-                    threadToBeUpdated.name = name;
-                    toBeChanged.username = username;
-                    threadToBeUpdated.username = username;
-                    out.println("8Yes" + "|" + threadToBeUpdated.name + "|" + threadToBeUpdated.username);
-                }else {
-                    out.println("8No" + "|" + name + "|" + username);
-                }
-
             }
         }
     }
