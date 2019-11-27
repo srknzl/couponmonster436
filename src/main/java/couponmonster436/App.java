@@ -60,6 +60,33 @@ class CommunicationThread implements Runnable {
     private String name = "";
     private int score = 0;
     private int pulseCounter = 0;
+    /*
+     0 Get: Hello  -> Send: Welcome + initial coupons
+     1 Send: New Coupon
+     2 Send: Clear coupon
+     3 Get: Answer -> Send: True/False
+     4 Get: Selection -> Send: True/False
+     5 Get: Dismiss
+     6 Send: User data
+     7 Send: All users
+     8 Get: New name and username Send: Yes/No
+     9 Get: Pulse Send: Pulse
+     */
+    public enum MessageTypes {
+        Greet('0'),
+        Answer('3'),
+        Selection('4'),
+        Dismiss('5'),
+        OwnUserData('6'),
+        AllUsersData('7'),
+        UserdataChange('8');
+
+        public final char Message;
+
+        MessageTypes(char id){
+            this.Message = id;
+        }
+    }
 
     private int index = App.producedCouponHashes.size();
     private int broadcastIndex = App.broadCastMessages.size();
@@ -135,9 +162,9 @@ class CommunicationThread implements Runnable {
      9 Get: Pulse Send: Pulse
     */
     private void processMessages(String message) {
-        if(!message.equals("9"))System.out.println("Incoming message: " + message);
+        if(!message.equals("9"))System.out.println("Incoming message: " + message); // 9 is pulse message
         if(message.length() > 0) {
-            if (message.charAt(0) == '0') {
+            if (message.charAt(0) == MessageTypes.Greet.Message) {
                 if(message.length() == 1) return;
                 String[] tokens = message.substring(1).split("\\|", 2);
                 if(tokens.length != 2) return;
@@ -164,7 +191,7 @@ class CommunicationThread implements Runnable {
                 if (coupons.length() > 0) coupons = new StringBuilder(coupons.substring(0, coupons.length() - 1));
                 out.println("0" + coupons);
                 out.println("6" + this.name + "|" + this.username + "|" + this.score);
-            } else if (message.charAt(0) == '3') {
+            } else if (message.charAt(0) == MessageTypes.Answer.Message) {
                 if(message.length() == 1) return;
                 String[] tokens = message.substring(1).split("\\|");
                 if(tokens.length != 2) return;
@@ -197,7 +224,7 @@ class CommunicationThread implements Runnable {
                     System.out.println("Wrong answer");
                     if (c != null && c.lock != null) c.lock.releaseLock();
                 }
-            } else if (message.charAt(0) == '4') {
+            } else if (message.charAt(0) == MessageTypes.Selection.Message) {
                 if(message.length() == 1) return;
                 String hash = message.substring(1);
                 Coupon c = App.coupons.get(hash);
@@ -212,7 +239,7 @@ class CommunicationThread implements Runnable {
                     out.println("4No|" + hash);
                     System.out.println("Outgoing no");
                 }
-            } else if (message.charAt(0) == '5') {
+            } else if (message.charAt(0) == MessageTypes.Dismiss.Message) {
                 if(message.length() == 1) return;
                 String[] tokens = message.substring(1).split("\\|");
                 if(tokens.length != 1) return;
@@ -222,16 +249,16 @@ class CommunicationThread implements Runnable {
                 if (c != null && c.lock != null) {
                     c.lock.releaseLock();
                 }
-            } else if (message.charAt(0) == '6') {
+            } else if (message.charAt(0) == MessageTypes.OwnUserData.Message) {
                 out.println("6" + this.name + "|" + this.username + "|" + this.score);
-            } else if (message.charAt(0) == '7') {
+            } else if (message.charAt(0) == MessageTypes.AllUsersData.Message) {
                 StringBuilder users = new StringBuilder();
                 for (User s : App.users) {
                     users.append(s.name).append("|").append(s.username).append("|").append(s.score).append(";");
                 }
                 if (users.length() > 0) users = new StringBuilder(users.substring(0, users.length() - 1));
                 out.println("7" + users);
-            } else if (message.charAt(0) == '8') {
+            } else if (message.charAt(0) == MessageTypes.UserdataChange.Message) {
                 if(message.length() == 1) return;
                 String[] tokens = message.substring(1).split("\\|", 3);
                 if(tokens.length != 3) return;
