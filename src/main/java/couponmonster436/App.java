@@ -314,19 +314,27 @@ class ProducerThread implements Runnable{
                     (random.nextFloat() * (rightLimit - leftLimit + 1));
             buffer.append((char) randomLimitedInt);
         }
-        int difficulty = ((int)(Math.random()*20+1));
+        int difficulty = ((int)(Math.random()*15+1));
         String problem = generateProblem(difficulty);
         int result = getResultOfProblem(problem);
         if (result == Integer.MAX_VALUE) return new Coupon();
         return new Coupon(buffer.toString(),new Date(),problem,difficulty*10 + "TL" + " discount for shoppings above " + difficulty*50 + " TL.",result,getTimeOfProblem((difficulty)));
     }
-    private static String operator(){
+    private static String operator(int multiplyTimes, int difficulty){
         String opr="s";
-        int a=(int)(Math.random()*3+1);
-        switch (a){
-            case 1:opr="+"; break;
-            case 2:opr="-"; break;
-            case 3:opr="*"; break;
+        if(multiplyTimes > difficulty / 4){
+            int a = (int)(Math.random()*2+1);
+            switch (a){
+                case 1:opr="+"; break;
+                case 2:opr="-"; break;
+            }
+        }else{
+            int a=(int)(Math.random()*3+1);
+            switch (a){
+                case 1:opr="+"; break;
+                case 2:opr="-"; break;
+                case 3:opr="*"; break;
+            }
         }
         return opr;
     }
@@ -338,11 +346,13 @@ class ProducerThread implements Runnable{
         int openTime = 0;
         int opened = 0;
         int closed = 0;
+        int multiplyTimes = 0;
         for(int i=0;i<difficulty/2;i++){
-            String operator = operator();
-            if(operator.equals("*"))
+            String operator = operator(multiplyTimes,difficulty);
+            if(operator.equals("*")){
+                multiplyTimes += 1;
                 a=(int)(Math.random()*difficulty/2+1);
-            else
+            }else
                 a=(int)(Math.random()*difficulty+1);
             question.append(operator);
             if(Math.random() > 0.5 && !close){
