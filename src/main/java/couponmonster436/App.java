@@ -315,12 +315,6 @@ class ProducerThread implements Runnable{
             buffer.append((char) randomLimitedInt);
         }
         int difficulty = ((int)(Math.random()*15+1));
-        double luck = Math.random();
-        if(luck < 0.3){
-            difficulty = 30;
-        }else if(luck < 0.6){
-            difficulty = 25;
-        }
         String problem = generateProblem(difficulty);
         int result = getResultOfProblem(problem);
         if (result == Integer.MAX_VALUE) return new Coupon();
@@ -346,14 +340,7 @@ class ProducerThread implements Runnable{
     }
     private static String generateProblem(int difficulty){
         StringBuilder question = new StringBuilder();
-        int a;
-        if(difficulty == 30){
-            a=(int)(Math.random()*13+1);
-        }else if(difficulty == 25){
-            a=(int)(Math.random()*9+1);
-        }else {
-            a=(int)(Math.random()*difficulty+1);
-        }
+        int a = (int)(Math.random()*difficulty+1);
         question.append(a);
         boolean close = false;
         int openTime = 0;
@@ -365,25 +352,9 @@ class ProducerThread implements Runnable{
                 String operator = operator(multiplyTimes,difficulty);
                 if(operator.equals("*")){
                     multiplyTimes += 1;
-                    if(difficulty == 30){
-                        a=(int)(Math.random()*13+1);
-                    }else if(difficulty == 25){
-                        a=(int)(Math.random()*11+1);
-                    }else if(difficulty <= 4){
-                        a=(int)(Math.random()*(difficulty+6)+1);
-                    }else{
-                        a=(int)(Math.random()*difficulty/2+1);
-                    }
+                    a=(int)(Math.random()*difficulty/2+1);
                 }else {
-                    if(difficulty == 30){
-                        a=(int)(Math.random()*16+1);
-                    }else if(difficulty == 25){
-                        a=(int)(Math.random()*13+1);
-                    }else if(difficulty <= 4){
-                        a=(int)(Math.random()*(difficulty+6)+1);
-                    }else{
-                        a=(int)(Math.random()*difficulty/1.5+1);
-                    }
+                    a=(int)(Math.random()*difficulty+1);
                 }
                 question.append(operator);
                 if(Math.random() > 0.5 && !close){
@@ -408,11 +379,6 @@ class ProducerThread implements Runnable{
     }
     private static int getTimeOfProblem(int difficulty, String problem){
         int bonus = 0;
-        if(difficulty == 30){
-            bonus = 6;
-        }else if( difficulty == 25){
-            bonus = 3;
-        }
 
         for(int i =0;i<problem.length();i++){
             if(problem.charAt(i) == '*'){
