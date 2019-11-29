@@ -324,7 +324,7 @@ class ProducerThread implements Runnable{
         String problem = generateProblem(difficulty);
         int result = getResultOfProblem(problem);
         if (result == Integer.MAX_VALUE) return new Coupon();
-        return new Coupon(buffer.toString(),new Date(),problem,difficulty*10 + "TL" + " discount for shoppings above " + difficulty*50 + " TL.",result,getTimeOfProblem((difficulty)));
+        return new Coupon(buffer.toString(),new Date(),problem,difficulty*10 + "TL" + " discount for shoppings above " + difficulty*50 + " TL.",result,getTimeOfProblem(difficulty,problem));
     }
     private static String operator(int multiplyTimes, int difficulty){
         String opr="s";
@@ -389,14 +389,21 @@ class ProducerThread implements Runnable{
         }
         return question.toString();
     }
-    private static int getTimeOfProblem(int difficulty){
+    private static int getTimeOfProblem(int difficulty, String problem){
         int bonus = 0;
         if(difficulty == 40){
             bonus = 6;
         }else if( difficulty == 30){
             bonus = 3;
         }
-        return Math.max((int)Math.ceil(difficulty/0.9),4) + bonus;
+
+        for(int i =0;i<problem.length();i++){
+            if(problem.charAt(i) == '*'){
+                bonus += 2;
+            }
+        }
+
+        return Math.max((int)Math.ceil(difficulty/1.4),4) + bonus;
     }
     private static int getResultOfProblem(String problem){
         ScriptEngineManager mgr = new ScriptEngineManager();
