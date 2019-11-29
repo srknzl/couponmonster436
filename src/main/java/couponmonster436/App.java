@@ -315,6 +315,12 @@ class ProducerThread implements Runnable{
             buffer.append((char) randomLimitedInt);
         }
         int difficulty = ((int)(Math.random()*15+1));
+        double luck = Math.random();
+        if(luck < 0.005){
+            difficulty = 40;
+        }else if(luck < 0.01){
+            difficulty = 30;
+        }
         String problem = generateProblem(difficulty);
         int result = getResultOfProblem(problem);
         if (result == Integer.MAX_VALUE) return new Coupon();
@@ -347,30 +353,36 @@ class ProducerThread implements Runnable{
         int opened = 0;
         int closed = 0;
         int multiplyTimes = 0;
-        for(int i=0;i<difficulty/2+1;i++){
-            String operator = operator(multiplyTimes,difficulty);
-            if(operator.equals("*")){
-                multiplyTimes += 1;
-                a=(int)(Math.random()*difficulty/2+1);
-            }else if(difficulty <= 4){
-                a=(int)(Math.random()*(difficulty+6)+1);
-            }else {
-                a=(int)(Math.random()*difficulty+1);
+
+            for(int i=0;i<difficulty/2+1;i++){
+                String operator = operator(multiplyTimes,difficulty);
+                if(operator.equals("*")){
+                    multiplyTimes += 1;
+                    a=(int)(Math.random()*difficulty/2+1);
+                }else if(difficulty == 40){
+                    a=(int)(Math.random()*22+1);
+                }else if(difficulty == 30){
+                    a=(int)(Math.random()*17+1);
+                }else if(difficulty <= 4){
+                    a=(int)(Math.random()*(difficulty+6)+1);
+                }else{
+                    a=(int)(Math.random()*difficulty+1);
+                }
+                question.append(operator);
+                if(Math.random() > 0.5 && !close){
+                    question.append("(");
+                    openTime = i;
+                    close = true;
+                    opened++;
+                }
+                question.append(a);
+                if(Math.random()>0.5 && close && i-openTime > 1){
+                    question.append(")");
+                    close = false;
+                    closed++;
+                }
             }
-            question.append(operator);
-            if(Math.random() > 0.5 && !close){
-                question.append("(");
-                openTime = i;
-                close = true;
-                opened++;
-            }
-            question.append(a);
-            if(Math.random()>0.5 && close && i-openTime > 1){
-                question.append(")");
-                close = false;
-                closed++;
-            }
-        }
+
         while (closed < opened){
             question.append(")");
             closed++;
@@ -378,7 +390,13 @@ class ProducerThread implements Runnable{
         return question.toString();
     }
     private static int getTimeOfProblem(int difficulty){
-        return Math.max((int)Math.ceil(difficulty/0.9),4);
+        int bonus = 0;
+        if(difficulty == 40){
+            bonus = 6;
+        }else if( difficulty == 30){
+            bonus = 3;
+        }
+        return Math.max((int)Math.ceil(difficulty/0.9),4) + bonus;
     }
     private static int getResultOfProblem(String problem){
         ScriptEngineManager mgr = new ScriptEngineManager();
