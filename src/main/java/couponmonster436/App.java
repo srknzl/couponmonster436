@@ -314,7 +314,7 @@ class ProducerThread implements Runnable{
                     (random.nextFloat() * (rightLimit - leftLimit + 1));
             buffer.append((char) randomLimitedInt);
         }
-        int difficulty = ((int)(Math.random()*20+1));
+        int difficulty = ((int)(Math.random()*15+1));
         String problem = generateProblem(difficulty);
         int result = getResultOfProblem(problem);
         if (result == Integer.MAX_VALUE) return new Coupon();
@@ -322,7 +322,7 @@ class ProducerThread implements Runnable{
     }
     private static String operator(int multiplyTimes, int difficulty){
         String opr="s";
-        if(multiplyTimes > difficulty / 4){
+        if(multiplyTimes > difficulty / 5){
             int a = (int)(Math.random()*2+1);
             switch (a){
                 case 1:opr="+"; break;
