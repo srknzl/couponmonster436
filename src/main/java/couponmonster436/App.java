@@ -347,13 +347,16 @@ class ProducerThread implements Runnable{
         int opened = 0;
         int closed = 0;
         int multiplyTimes = 0;
-        for(int i=0;i<difficulty/2;i++){
+        for(int i=0;i<difficulty/2+1;i++){
             String operator = operator(multiplyTimes,difficulty);
             if(operator.equals("*")){
                 multiplyTimes += 1;
                 a=(int)(Math.random()*difficulty/2+1);
-            }else
+            }else if(difficulty <= 4){
+                a=(int)(Math.random()*(difficulty+6)+1);
+            }else {
                 a=(int)(Math.random()*difficulty+1);
+            }
             question.append(operator);
             if(Math.random() > 0.5 && !close){
                 question.append("(");
@@ -375,7 +378,7 @@ class ProducerThread implements Runnable{
         return question.toString();
     }
     private static int getTimeOfProblem(int difficulty){
-        return Math.max((int)Math.ceil(difficulty/1.2),4);
+        return Math.max((int)Math.ceil(difficulty/0.9),4);
     }
     private static int getResultOfProblem(String problem){
         ScriptEngineManager mgr = new ScriptEngineManager();
