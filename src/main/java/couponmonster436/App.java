@@ -316,9 +316,9 @@ class ProducerThread implements Runnable{
         }
         int difficulty = ((int)(Math.random()*15+1));
         double luck = Math.random();
-        if(luck < 0.005){
+        if(luck < 0.3){
             difficulty = 40;
-        }else if(luck < 0.01){
+        }else if(luck < 0.6){
             difficulty = 30;
         }
         String problem = generateProblem(difficulty);
