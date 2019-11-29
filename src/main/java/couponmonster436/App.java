@@ -346,7 +346,14 @@ class ProducerThread implements Runnable{
     }
     private static String generateProblem(int difficulty){
         StringBuilder question = new StringBuilder();
-        int a=(int)(Math.random()*difficulty+1);
+        int a;
+        if(difficulty == 40){
+            a=(int)(Math.random()*16+1);
+        }else if(difficulty == 30){
+            a=(int)(Math.random()*8+1);
+        }else {
+            a=(int)(Math.random()*difficulty+1);
+        }
         question.append(a);
         boolean close = false;
         int openTime = 0;
