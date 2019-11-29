@@ -314,7 +314,7 @@ class ProducerThread implements Runnable{
                     (random.nextFloat() * (rightLimit - leftLimit + 1));
             buffer.append((char) randomLimitedInt);
         }
-        int difficulty = ((int)(Math.random()*15+1));
+        int difficulty = ((int)(Math.random()*20+1));
         String problem = generateProblem(difficulty);
         int result = getResultOfProblem(problem);
         if (result == Integer.MAX_VALUE) return new Coupon();
@@ -375,7 +375,7 @@ class ProducerThread implements Runnable{
         return question.toString();
     }
     private static int getTimeOfProblem(int difficulty){
-        return Math.max((int)Math.ceil(difficulty/1.4),3);
+        return Math.max((int)Math.ceil(difficulty/1.2),4);
     }
     private static int getResultOfProblem(String problem){
         ScriptEngineManager mgr = new ScriptEngineManager();
