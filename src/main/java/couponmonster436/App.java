@@ -358,15 +358,25 @@ class ProducerThread implements Runnable{
                 String operator = operator(multiplyTimes,difficulty);
                 if(operator.equals("*")){
                     multiplyTimes += 1;
-                    a=(int)(Math.random()*difficulty/2+1);
-                }else if(difficulty == 40){
-                    a=(int)(Math.random()*22+1);
-                }else if(difficulty == 30){
-                    a=(int)(Math.random()*17+1);
-                }else if(difficulty <= 4){
-                    a=(int)(Math.random()*(difficulty+6)+1);
-                }else{
-                    a=(int)(Math.random()*difficulty+1);
+                    if(difficulty == 40){
+                        a=(int)(Math.random()*14+1);
+                    }else if(difficulty == 30){
+                        a=(int)(Math.random()*10+1);
+                    }else if(difficulty <= 4){
+                        a=(int)(Math.random()*(difficulty+6)+1);
+                    }else{
+                        a=(int)(Math.random()*difficulty/2+1);
+                    }
+                }else {
+                    if(difficulty == 40){
+                        a=(int)(Math.random()*20+1);
+                    }else if(difficulty == 30){
+                        a=(int)(Math.random()*15+1);
+                    }else if(difficulty <= 4){
+                        a=(int)(Math.random()*(difficulty+6)+1);
+                    }else{
+                        a=(int)(Math.random()*difficulty+1);
+                    }
                 }
                 question.append(operator);
                 if(Math.random() > 0.5 && !close){
