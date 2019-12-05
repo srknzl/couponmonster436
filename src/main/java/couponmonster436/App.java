@@ -102,13 +102,16 @@ class CommunicationThread implements Runnable {
             while(true){
                 pulseCounter = (pulseCounter+1)%100;
                 if(pulseCounter == 0){
-                    System.out.println("pulse");
                     out.println("9");
+                    System.out.println("pulse");
                 }
                 if(out.checkError() || Thread.interrupted()){
+                    if(selectedCoupon!=null && selectedCoupon.lock != null){
+                        System.out.println("V in pulse");
+                        selectedCoupon.lock.V();
+                    }
                     for (User nextUser : App.users) {
                         if (nextUser.username.equals(this.username)) {
-                            System.out.println("User remove "+nextUser.username);
                             App.users.remove(nextUser);
                             break;
                         }
