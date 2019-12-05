@@ -100,13 +100,7 @@ class CommunicationThread implements Runnable {
             Scanner in = new Scanner(this.clientSocket.getInputStream(), StandardCharsets.UTF_8);
             out = new PrintWriter(new BufferedWriter( new OutputStreamWriter(this.clientSocket.getOutputStream(), StandardCharsets.UTF_8)),true);
             while(true){
-                pulseCounter = (pulseCounter+1)%10;
-                if(pulseCounter == 0)out.println("9");
                 if(out.checkError() || Thread.interrupted()){
-                    if(selectedCoupon!=null && selectedCoupon.lock != null){
-                        System.out.println("V in pulse");
-                        selectedCoupon.lock.V();
-                    }
                     for (User nextUser : App.users) {
                         if (nextUser.username.equals(this.username)) {
                             System.out.println("User remove "+nextUser.username);
@@ -114,8 +108,8 @@ class CommunicationThread implements Runnable {
                             break;
                         }
                     }
-                    System.out.println("Communication remove");
-                    //App.Communications.removeElementAt(App.Communications.indexOf(this));
+                    App.Communications.removeElementAt(App.Communications.indexOf(this));
+                    System.out.println("Return");
                     return;
                 }
                 if(this.clientSocket.getInputStream().available() >0 && in.hasNextLine()){
