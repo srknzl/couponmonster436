@@ -10,7 +10,7 @@ public class Coupon {
     Lock lock;
 
 
-    private int solveTime;
+    public int solveTime;
     Coupon(String hash, Date creationDate, String problem, String reward, int answer, int solveTime){
         this.hash = hash;
         this.creationDate = creationDate;

@@ -106,10 +106,6 @@ class CommunicationThread implements Runnable {
                     System.out.println("pulse");
                 }
                 if(out.checkError() || Thread.interrupted()){
-                    if(selectedCoupon!=null && selectedCoupon.lock != null){
-                        System.out.println("V in pulse");
-                        selectedCoupon.lock.V();
-                    }
                     for (User nextUser : App.users) {
                         if (nextUser.username.equals(this.username)) {
                             App.users.remove(nextUser);
@@ -247,6 +243,13 @@ class CommunicationThread implements Runnable {
                     selectedCoupon = c;
                     out.println("4Yes|" + hash);
                     System.out.println("Outgoing yes");
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            System.out.println("Lock released by time");
+                            c.lock.V();
+                        }
+                    }, c.solveTime*1000L);
                 } else {
                     out.println("4No|" + hash);
                     System.out.println("Outgoing no");
