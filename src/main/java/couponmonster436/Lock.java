@@ -1,17 +1,16 @@
 package couponmonster436;
 
-class Lock {
-    private boolean available = true;
-    Lock(){
+public class Lock { // used for mutual exclusion
+    private boolean value;
+    Lock(boolean initValue) {
+        value = initValue;
     }
-    boolean getLock(){
-        if (!available){
-           return false;
-        }
-        available = false;
+    public synchronized boolean P() { // atomic operation // blocking
+        if(!value)return false;
+        value = false;
         return true;
     }
-    void releaseLock(){
-        available = true;
+    public synchronized void V() { // atomic operation // non-blocking
+        value = true;
     }
 }

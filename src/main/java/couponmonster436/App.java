@@ -103,7 +103,7 @@ class CommunicationThread implements Runnable {
                 pulseCounter = (pulseCounter+1)%10;
                 if(pulseCounter == 0)out.println("9");
                 if(out.checkError() || Thread.interrupted()){
-                    if(selectedCoupon!=null && selectedCoupon.lock != null)selectedCoupon.lock.releaseLock();
+                    if(selectedCoupon!=null && selectedCoupon.lock != null)selectedCoupon.lock.V();
                     for (User nextUser : App.users) {
                         if (nextUser.username.equals(this.username)) {
                             App.users.remove(nextUser);
@@ -145,7 +145,7 @@ class CommunicationThread implements Runnable {
             } catch (IOException ef) {
                 ef.printStackTrace();
             }
-            if(selectedCoupon != null && selectedCoupon.lock != null)selectedCoupon.lock.releaseLock();
+            if(selectedCoupon != null && selectedCoupon.lock != null)selectedCoupon.lock.V();
             App.Communications.removeElementAt(App.Communications.indexOf(this));
         }
     }
@@ -222,7 +222,7 @@ class CommunicationThread implements Runnable {
                     Coupon c = App.coupons.get(hash);
                     out.println("3No|" + hash);
                     System.out.println("Wrong answer");
-                    if (c != null && c.lock != null) c.lock.releaseLock();
+                    if (c != null && c.lock != null) c.lock.V();
                 }
             } else if (message.charAt(0) == MessageTypes.Selection.Message) {
                 if(message.length() == 1) return;
@@ -231,7 +231,7 @@ class CommunicationThread implements Runnable {
                 //System.out.println("Trying get lock of: "+ hash);
                 //System.out.println("Coupon: "+ c.toString());
 
-                if (c != null && c.lock != null && c.lock.getLock()) {
+                if (c != null && c.lock != null && c.lock.P()) {
                     selectedCoupon = c;
                     out.println("4Yes|" + hash);
                     System.out.println("Outgoing yes");
@@ -247,7 +247,7 @@ class CommunicationThread implements Runnable {
                 if (selectedCoupon != null && selectedCoupon.getHash().equals(hash)) selectedCoupon = null;
                 Coupon c = App.coupons.get(hash);
                 if (c != null && c.lock != null) {
-                    c.lock.releaseLock();
+                    c.lock.V();
                 }
             } else if (message.charAt(0) == MessageTypes.OwnUserData.Message) {
                 out.println("6" + this.name + "|" + this.username + "|" + this.score);

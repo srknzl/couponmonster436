@@ -18,7 +18,7 @@ public class Coupon {
         this.answer = answer;
         this.reward = reward;
         this.solveTime = solveTime;
-        this.lock = new Lock();
+        this.lock = new Lock(true);
     }
     Coupon(){
         this.hash = "";
@@ -27,7 +27,7 @@ public class Coupon {
         this.reward = "";
         this.answer = 0;
         this.solveTime = 0;
-        this.lock = new Lock();
+        this.lock = new Lock(true);
     }
 
     String getHash(){
