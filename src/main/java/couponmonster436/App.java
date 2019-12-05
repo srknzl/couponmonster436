@@ -103,7 +103,7 @@ class CommunicationThread implements Runnable {
                 pulseCounter = (pulseCounter+1)%100;
                 if(pulseCounter == 0){
                     out.println("9");
-                    System.out.println("pulse");
+                    System.out.println("pulse" + Thread.activeCount());
                 }
                 if(out.checkError() || Thread.interrupted()){
                     for (User nextUser : App.users) {
