@@ -109,10 +109,12 @@ class CommunicationThread implements Runnable {
                     }
                     for (User nextUser : App.users) {
                         if (nextUser.username.equals(this.username)) {
+                            System.out.println("User remove "+nextUser.username);
                             App.users.remove(nextUser);
                             break;
                         }
                     }
+                    System.out.println("Communication remove");
                     App.Communications.removeElementAt(App.Communications.indexOf(this));
                     return;
                 }
