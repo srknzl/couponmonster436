@@ -115,7 +115,7 @@ class CommunicationThread implements Runnable {
                         }
                     }
                     System.out.println("Communication remove");
-                    App.Communications.removeElementAt(App.Communications.indexOf(this));
+                    //App.Communications.removeElementAt(App.Communications.indexOf(this));
                     return;
                 }
                 if(this.clientSocket.getInputStream().available() >0 && in.hasNextLine()){
